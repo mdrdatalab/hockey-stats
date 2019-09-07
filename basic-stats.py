@@ -44,4 +44,64 @@ df[df.duplicated(['Player'])]
 df.drop_duplicates(['Player'], inplace=True)
 #now no duplicates
 
+
+
+#misc visualizations
 df.boxplot(column='PTS', by='Pos')
+
+df.boxplot(column='+/-', by='Pos')
+
+
+
+
+
+
+#PCA and visualization
+from sklearn.decomposition import PCA
+
+cols = list(df.columns)
+cols.remove('ATOI')
+#Average Time on Ice is a linear combination of Games Played and Time
+#   on Ice, so is redundant.
+features = cols[5:]
+
+
+x = df.loc[:,features].values
+X = StandardScaler().fit_transform(x)
+
+pca = PCA(n_components = 2)
+principalComponents = pca.fit_transform(X)
+principalDF = pd.DataFrame(data = principalComponents, columns = ['pc1', 'pc2'])
+
+target = pd.DataFrame(y,columns=['Pos'])
+
+finalDF = pd.concat([principalDF,target], axis=1)
+
+def offdef(x):
+    if x in ['LW','RW','C','W']:
+        return 'F'
+    else:
+        return 'D'
+#right now just focus on Forward/Defense        
+finalDF['target'] = finalDF['Pos'].apply(offdef)
+
+fig = plt.figure(figsize = (10,10))
+ax = fig.add_subplot(1,1,1)
+targets = ['F','D']
+colors = ['r','b']
+
+for target, color in zip(targets, colors):
+    indicesToKeep = finalDF['target'] == target
+    ax.scatter(finalDF.loc[indicesToKeep, 'pc 1'],
+               finalDF.loc[indicesToKeep, 'pc2'],
+                c = color,
+                s = 50)
+
+
+
+#can we predict Forward vs. Defense from basic stats?
+from sklearn.model_selection import train_test_split
+
+train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=1/7.0)
+
+
