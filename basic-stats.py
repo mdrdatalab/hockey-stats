@@ -21,6 +21,7 @@ hockey stats
 
 
 import pandas as pd
+import numpy as np
 
 df = pd.read_csv('data\skaterbasicstats18.csv', header=1)
 
@@ -105,7 +106,21 @@ for target, color in zip(targets, colors):
 
 #can we predict Forward vs. Defense from basic stats?
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 
-train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=1/7.0)
+new_y = [offdef(player) for player in y]
+train_x, test_x, train_y, test_y = train_test_split(x, new_y, test_size=1/7.0)
+scaler = StandardScaler()
+scaler.fit(train_x)
 
+train_x = scaler.transform(train_x)
+test_x = scaler.transform(test_x)
 
+logisticRegr = LogisticRegression(solver='lbfgs')
+logisticRegr.fit(train_x, train_y)
+
+logisticRegr.score(test_x, test_y)
+#0.92 not bad, curious to see what it got wrong (who)
+
+incorrect = np.where(pred != test_y).tolist()
+#missing indexes ugh
