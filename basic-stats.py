@@ -58,6 +58,9 @@ df.boxplot(column='+/-', by='Pos')
 
 #PCA and visualization
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+
 
 cols = list(df.columns)
 cols.remove('ATOI')
@@ -67,6 +70,7 @@ features = cols[5:]
 
 
 x = df.loc[:,features].values
+y = df.loc[:,['Pos']].values
 X = StandardScaler().fit_transform(x)
 
 pca = PCA(n_components = 2)
@@ -92,7 +96,7 @@ colors = ['r','b']
 
 for target, color in zip(targets, colors):
     indicesToKeep = finalDF['target'] == target
-    ax.scatter(finalDF.loc[indicesToKeep, 'pc 1'],
+    ax.scatter(finalDF.loc[indicesToKeep, 'pc1'],
                finalDF.loc[indicesToKeep, 'pc2'],
                 c = color,
                 s = 50)
